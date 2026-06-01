@@ -1,13 +1,14 @@
-# etapa7/ConsultasJoin.py
 # Módulo para consultas avançadas utilizando cruzamento de tabelas (JOINs)
+
 import etapa2.RegristrarDados as e2
 import etapa3.Consultas as e3
 
-
+# Função para relátorio de matriculas
 def listar_matriculas_detalhadas(cursor):
     print('\n=== RELATÓRIO DE MATRÍCULAS (INNER JOIN) ===')
     
-    # INNER JOIN traz APENAS os registros que possuem correspondência em todas as tabelas
+    # INNER JOIN combina registros onde há correspondência nas tabelas vinculadas.
+    # Se uma matrícula não tiver um aluno ou professor válido, ela não aparecerá aqui.
     comando = '''
         SELECT 
             m.id_matricula, 
@@ -34,11 +35,12 @@ def listar_matriculas_detalhadas(cursor):
             print(f"{linha[0]:<5} | {linha[1]:<20} | {linha[2]:<20} | {linha[3]:<15} | {linha[4]} às {linha[5]}")
     print("-" * 88)
 
+# Função para listar as turmas dos professores
 def listar_professores_e_turmas(cursor):
     print('\n=== CARGA HORÁRIA DOS PROFESSORES (LEFT JOIN) ===')
     
-    # LEFT JOIN garante que TODOS os professores da tabela 'professores' apareçam, 
-    # mesmo aqueles que não têm nenhuma matrícula associada na tabela 'matriculas'.
+    # LEFT JOIN preserva todos os registros da tabela à esquerda (professores),
+    # mesmo que não possuam correspondência na tabela de matrículas.
     comando = '''
         SELECT 
             p.id_professor, 
@@ -61,14 +63,15 @@ def listar_professores_e_turmas(cursor):
             print(f"{linha[0]:<5} | {linha[1]:<25} | {linha[2]:<20}")
     print("-" * 56)
 
+# Função para listar os alunos que estão matriculados a um professor específico
 def listar_alunos_por_professor_especifico(cursor):
-    print('\n=== 1. ALUNOS DE UM PROFESSOR ESPECÍFICO ===')
+    print('\n=== ALUNOS DE UM PROFESSOR ESPECÍFICO ===')
     
-    # Mostra os professores para facilitar a escolha
+    # Lista professores para que o usuário possa escolher um ID válido
     e3.listar_todos_professores(cursor)
     id_prof = e2.ler_inteiro('\nInforme o ID do professor para ver sua turma: ', obrigatorio=True)
     
-    # INNER JOIN cruzando alunos e instrumentos, filtrando pelo ID do professor
+    # Utiliza INNER JOIN para filtrar apenas as matrículas do professor selecionado
     comando = '''
         SELECT 
             a.nome AS aluno, 
@@ -92,11 +95,12 @@ def listar_alunos_por_professor_especifico(cursor):
             print(f"{linha[0]:<25} | {linha[1]:<20} | {linha[2]} às {linha[3]}")
     print("-" * 70)
 
+# Função para listar instrumentos que não foram escolhidos
 def listar_instrumentos_nao_escolhidos(cursor):
-    print('\n=== 7. INSTRUMENTOS NUNCA ESCOLHIDOS (LEFT JOIN) ===')
+    print('\n=== INSTRUMENTOS NUNCA ESCOLHIDOS (LEFT JOIN + IS NULL) ===')
     
-    # LEFT JOIN: Pega TODOS os instrumentos e cruza com matrículas.
-    # O WHERE m.id_matricula IS NULL filtra apenas os que "sobraram" (sem matrícula).
+    # A técnica LEFT JOIN seguida de WHERE ... IS NULL é usada para identificar 
+    # registros "órfãos" ou sem relação na outra tabela.
     comando = '''
         SELECT 
             i.id_instrumento, 

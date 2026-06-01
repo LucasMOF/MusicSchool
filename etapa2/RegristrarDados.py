@@ -6,6 +6,25 @@ import mysql.connector
 # Funções Auxiliares de Validação de Input
 # ==========================================
 
+def ler_nome(mensagem, obrigatorio=True):
+    while True:
+        # strip() remove espaços em branco acidentais no início e fim da string
+        valor = input(mensagem).strip()
+        
+        # Verifica se a string ficou vazia após a limpeza
+        if valor == "":
+            if obrigatorio:
+                print("Erro: Este campo é obrigatório e não pode ficar em branco.\n")
+                continue 
+            else:
+                # Retorna None (nulo) para o banco de dados se o campo for opcional
+                return None 
+        if valor.isdigit():
+            print('Erro: Este campo espera um texto e não apenas números.')
+            continue
+                
+        return valor
+
 def ler_texto(mensagem, obrigatorio=True):
     # Loop infinito que só quebra quando o usuário digitar um texto válido
     while True:
@@ -100,10 +119,11 @@ def executar_insercao(cursor, conexao, descricao, comando_sql, dados):
 # Funções Específicas de Cadastro (CREATE)
 # ==========================================
 
+#Função para cadastrar Aluno
 def cadastrar_aluno(cursor, conexao):
     print('\n=== CADASTRO DE ALUNO ===')
-    nome = ler_texto('Informe o nome do aluno: ', obrigatorio=True)
-    telefone = ler_texto('Informe o telefone do aluno: ', obrigatorio=True)
+    nome = ler_nome('Informe o nome do aluno: ', obrigatorio=True)
+    telefone = ler_inteiro('Informe o telefone do aluno: ', obrigatorio=True)
     idade = ler_inteiro('Informe a idade do aluno (Enter para pular): ', obrigatorio=False, minimo=1)
     email = ler_texto('Informe o email do aluno (Enter para pular): ', obrigatorio=False)
 
@@ -114,12 +134,13 @@ def cadastrar_aluno(cursor, conexao):
     dados_aluno = (nome, telefone, idade, email)
     executar_insercao(cursor, conexao, 'Aluno', comando_aluno, dados_aluno)
 
+# Função para cadastrar Professor
 def cadastrar_professor(cursor, conexao):
     print('\n=== CADASTRO DE PROFESSOR ===')
-    nome = ler_texto('Informe o nome do professor: ', obrigatorio=True)
+    nome = ler_nome('Informe o nome do professor: ', obrigatorio=True)
     instrumento = ler_texto('Informe o instrumento principal: ', obrigatorio=True)
     anos_exp = ler_inteiro('Informe os anos de experiência (Enter para pular): ', obrigatorio=False, minimo=0)
-    telefone = ler_texto('Informe o telefone do professor (Enter para pular): ', obrigatorio=False)
+    telefone = ler_inteiro('Informe o telefone do professor (Enter para pular): ', obrigatorio=False)
 
     comando_prof = '''
     INSERT INTO professores (nome, instrumento_principal, anos_experiencia, telefone)
@@ -128,9 +149,10 @@ def cadastrar_professor(cursor, conexao):
     dados_prof = (nome, instrumento, anos_exp, telefone)
     executar_insercao(cursor, conexao, 'Professor', comando_prof, dados_prof)
 
+# Função para cadastar Instrumentos
 def cadastrar_instrumento(cursor, conexao):
     print('\n=== CADASTRO DE INSTRUMENTO ===')
-    nome = ler_texto('Informe o nome do instrumento: ', obrigatorio=True)
+    nome = ler_nome('Informe o nome do instrumento: ', obrigatorio=True)
     categoria = ler_texto('Informe a categoria (Cordas, Teclas, Sopro): ', obrigatorio=True)
     marca = ler_texto('Informe a marca (Enter para pular): ', obrigatorio=False)
     qtd = ler_inteiro('Informe a quantidade em estoque: ', obrigatorio=True, minimo=0)
@@ -142,6 +164,7 @@ def cadastrar_instrumento(cursor, conexao):
     dados_inst = (nome, categoria, marca, qtd)
     executar_insercao(cursor, conexao, 'Instrumento', comando_inst, dados_inst)
 
+#Função para cadastrar Matrículas
 def cadastrar_matricula(cursor, conexao):
     print('\n=== EFETUAR MATRÍCULA ===')
     

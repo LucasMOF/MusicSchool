@@ -1,21 +1,24 @@
-
 import mysql.connector
 
-# Conectando ao MySQL
-conexao = mysql.connector.connect (
-    host='localhost',
-    user='root',
-    password='',
-    database='musicSchool'
-)
+# Bloco try principal para proteger a tentativa de conexao com o banco
+try:
+    # Conecta diretamente ao banco de dados recem-criado
+    conexao = mysql.connector.connect (
+        host='localhost',
+        user='root',
+        password='',
+        database='musicSchool'
+    )
 
-if conexao.is_connected():
-        print('Conexão com o MySQL estabelecida com sucesso!')
+    # Verifica se o objeto de conexao esta ativo
+    if conexao.is_connected():
+        print('Conexao com o MySQL estabelecida com sucesso!')
 
-        # Cria um cursor para executar comandos SQL
+        # Instancia o cursor para execucao dos scripts SQL
         cursor = conexao.cursor()
 
         try:
+            # Comando para criar a tabela de alunos com chave primaria autoincremento
             comando_sql1 = '''
             CREATE TABLE IF NOT EXISTS alunos (
                 id_aluno INT AUTO_INCREMENT PRIMARY KEY,
@@ -25,6 +28,7 @@ if conexao.is_connected():
                 email VARCHAR(100) NULL
             )'''
 
+            # Comando para criar a tabela de professores
             comando_sql2 = '''
             CREATE TABLE IF NOT EXISTS professores (
                 id_professor INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,6 +38,7 @@ if conexao.is_connected():
                 telefone VARCHAR(20) NULL
             )'''
 
+            # Comando para criar a tabela de instrumentos com valor padrao de estoque
             comando_sql3 = '''
             CREATE TABLE IF NOT EXISTS instrumentos (
                 id_instrumento INT AUTO_INCREMENT PRIMARY KEY,
@@ -43,6 +48,8 @@ if conexao.is_connected():
                 qtd_disponivel INT DEFAULT 0
             )'''
 
+            # Comando para criar a tabela associativa de matriculas 
+            # Implementadas as restricoes de Chave Estrangeira (FOREIGN KEY) para garantir integridade referencial
             comando_sql4 = '''
             CREATE TABLE IF NOT EXISTS matriculas (
                 id_matricula INT AUTO_INCREMENT PRIMARY KEY,
@@ -51,31 +58,38 @@ if conexao.is_connected():
                 id_instrumento INT NOT NULL,
                 dia_semana VARCHAR(20) NOT NULL,
                 horario TIME NOT NULL,
-                valor_mensal DECIMAL(10,2) NOT NULL
+                valor_mensal DECIMAL(10,2) NOT NULL,
             )'''
         
-
-            # Executa todos os comandos de criação das tabelas
+            # Executa os comandos SQL em sequencia para estruturar o banco
             cursor.execute(comando_sql1)
             cursor.execute(comando_sql2)
             cursor.execute(comando_sql3)
             cursor.execute(comando_sql4)
 
-            print('Tabelas criadas com sucesso!')
+            print('Tabelas validadas/criadas com sucesso!')
 
-            # Mostra as tabelas existentes no banco
+            # Realiza uma consulta ao banco para listar as tabelas geradas
             cursor.execute('SHOW TABLES')
+            
+            # Itera sobre o resultado da consulta e exibe o nome de cada tabela
             for tabela in cursor:
                 print(f'Tabela encontrada: {tabela[0]}')
 
         except mysql.connector.Error as erro:
-            # Trata erros de execução SQL
+            # Intercepta erros especificos na construcao das tabelas ou na sintaxe SQL
             print(f'Erro ao executar comandos SQL: {erro}')
 
         finally:
-            # Fecha o cursor, mesmo se houver erro
-            cursor.close()
+            # Encerra o cursor para evitar vazamento de memoria no banco
+            if 'cursor' in locals():
+                cursor.close()
 
-else:
-    # Caso a conexão não tenha sido estabelecida
-    print('Não foi possível conectar ao MySQL.')
+except mysql.connector.Error as erro:
+    # Tratamento caso o banco musicSchool nao exista ou o servidor esteja inacessivel
+    print(f'Nao foi possivel conectar ao MySQL ou banco nao encontrado: {erro}')
+
+finally:
+    # Encerra a conexao com o banco de dados caso ela tenha sido aberta
+    if 'conexao' in locals() and conexao.is_connected():
+        conexao.close()

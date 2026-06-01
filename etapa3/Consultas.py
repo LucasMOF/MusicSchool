@@ -1,4 +1,3 @@
-# etapa3/Consultas.py
 # Módulo de consultas básicas (Listagens Gerais e Filtros Simples)
 
 import etapa2.RegristrarDados as e2
@@ -7,22 +6,27 @@ import etapa2.RegristrarDados as e2
 # Listagens Gerais (SELECT Geral)
 # ==========================================
 
+# Função para listar todos os alunos
 def listar_todos_alunos(cursor):
     print('\n--- LISTA DE TODOS OS ALUNOS ---')
+    # Realiza a busca de todos os alunos cadastrados
     cursor.execute("SELECT id_aluno, nome, telefone, idade, email FROM alunos")
     resultados = cursor.fetchall()
     
     if not resultados:
         print("Nenhum aluno cadastrado.")
     else:
+        # Formatação de cabeçalho para exibição organizada no terminal
         print(f"{'ID':<5} | {'Nome':<25} | {'Telefone':<15} | {'Idade':<5} | {'Email':<20}")
         print("-" * 75)
         for alu in resultados:
-            idade = alu[3] if alu[3] else "N/A"
-            email = alu[4] if alu[4] else "N/A"
+            # Tratamento para exibir 'N/A' caso o campo opcional esteja vazio
+            idade = alu[3] if alu[3] is not None else "N/A"
+            email = alu[4] if alu[4] is not None else "N/A"
             print(f"{alu[0]:<5} | {alu[1]:<25} | {alu[2]:<15} | {idade:<5} | {email:<20}")
     print("-" * 75)
 
+# Função para listar todos os professores
 def listar_todos_professores(cursor):
     print('\n--- LISTA DE TODOS OS PROFESSORES ---')
     cursor.execute("SELECT id_professor, nome, instrumento_principal, anos_experiencia FROM professores")
@@ -34,10 +38,13 @@ def listar_todos_professores(cursor):
         print(f"{'ID':<5} | {'Nome':<25} | {'Instrumento Principal':<25} | {'Exp. (Anos)':<12}")
         print("-" * 73)
         for prof in resultados:
+            # Verifica se o campo experiência existe para evitar exibição de None
             exp = prof[3] if prof[3] is not None else "N/A"
             print(f"{prof[0]:<5} | {prof[1]:<25} | {prof[2]:<25} | {exp:<12}")
     print("-" * 73)
 
+
+# Função para listar todos os instrumentos
 def listar_todos_instrumentos(cursor):
     print('\n--- LISTA DE TODOS OS INSTRUMENTOS ---')
     cursor.execute("SELECT id_instrumento, nome, categoria, marca, qtd_disponivel FROM instrumentos")
@@ -49,7 +56,7 @@ def listar_todos_instrumentos(cursor):
         print(f"{'ID':<5} | {'Nome':<20} | {'Categoria':<15} | {'Marca':<15} | {'Estoque':<8}")
         print("-" * 70)
         for inst in resultados:
-            marca = inst[3] if inst[3] else "N/A"
+            marca = inst[3] if inst[3] is not None else "N/A"
             print(f"{inst[0]:<5} | {inst[1]:<20} | {inst[2]:<15} | {marca:<15} | {inst[4]:<8}")
     print("-" * 70)
 
@@ -58,10 +65,13 @@ def listar_todos_instrumentos(cursor):
 # Consultas com Filtros (WHERE e ORDER BY)
 # ==========================================
 
+# Função para listar instrumentos abaixo de um valor de estoque
 def listar_instrumentos_baixo_estoque(cursor):
     print('\n--- FILTRAR INSTRUMENTOS POR ESTOQUE ---')
+    # Solicita ao usuário o limite de estoque para filtro
     limite = e2.ler_inteiro('Mostrar instrumentos com quantidade abaixo de: ', obrigatorio=True)
     
+    # Utiliza o parâmetro %s para prevenir SQL Injection no comando WHERE
     comando = "SELECT id_instrumento, nome, categoria, qtd_disponivel FROM instrumentos WHERE qtd_disponivel < %s"
     cursor.execute(comando, (limite,))
     resultados = cursor.fetchall()
@@ -76,10 +86,13 @@ def listar_instrumentos_baixo_estoque(cursor):
             print(f"{inst[0]:<5} | {inst[1]:<20} | {inst[2]:<15} | {inst[3]:<5}")
     print("-" * 55)
 
+# Função para listar matriculas acima do valor citado
 def listar_matriculas_por_valor(cursor):
     print('\n--- FILTRAR MATRÍCULAS POR VALOR ---')
+    # Solicita valor mínimo e converte via função auxiliar
     valor_min = e2.ler_float('Mostrar matrículas com valor acima de (Ex: 100.00): ', obrigatorio=True)
     
+    # Aplica filtro (WHERE) e ordenação decrescente (ORDER BY DESC)
     comando = "SELECT id_matricula, id_aluno, id_professor, valor_mensal FROM matriculas WHERE valor_mensal > %s ORDER BY valor_mensal DESC"
     cursor.execute(comando, (valor_min,))
     resultados = cursor.fetchall()
@@ -91,5 +104,6 @@ def listar_matriculas_por_valor(cursor):
         print(f"{'ID Mat.':<8} | {'ID Aluno':<10} | {'ID Prof.':<10} | {'Valor Mensal':<15}")
         print("-" * 50)
         for mat in resultados:
+            # Formatação numérica para exibição de moeda (duas casas decimais)
             print(f"{mat[0]:<8} | {mat[1]:<10} | {mat[2]:<10} | R$ {mat[3]:.2f}")
     print("-" * 50)

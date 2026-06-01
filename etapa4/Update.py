@@ -1,34 +1,37 @@
-# etapa4/Atualizar.py
 # Módulo para atualização de registros existentes (UPDATE, SET, WHERE)
 
 import etapa2.RegristrarDados as e2
 import etapa3.Consultas as e3
 
+# Função para atualizar o estoque de um instrumento
 def atualizar_estoque_instrumento(cursor, conexao):
     print('\n=== ATUALIZAR ESTOQUE DE INSTRUMENTO ===')
+    # Exibe a lista atual para facilitar a identificação do ID pelo usuário
     e3.listar_todos_instrumentos(cursor)
     
     id_inst = e2.ler_inteiro('\nInforme o ID do instrumento para atualizar: ', obrigatorio=True)
     nova_qtd = e2.ler_inteiro('Nova quantidade em estoque: ', obrigatorio=True, minimo=0)
 
+    # Comando SQL de atualização baseada na chave primária
     comando = "UPDATE instrumentos SET qtd_disponivel = %s WHERE id_instrumento = %s"
     
     try:
         cursor.execute(comando, (nova_qtd, id_inst))
-        conexao.commit() # O commit é essencial para gravar a alteração no banco
+        conexao.commit() # Efetiva a alteração no banco de dados
         
-        # rowcount verifica quantas linhas foram afetadas pelo comando
+        # Verifica se o ID realmente existia (rowcount retorna o número de linhas alteradas)
         if cursor.rowcount > 0:
             print("Estoque atualizado com sucesso!")
         else:
             print("Ocorreu um problema. Verifique se o ID está correto.")
     except Exception as erro:
         print(f"Erro ao atualizar o estoque: {erro}")
-        conexao.rollback()
+        conexao.rollback() # Desfaz a operação em caso de erro para manter a integridade
 
+# Função para atualizar o valor de uma matricula
 def atualizar_valor_matricula(cursor, conexao):
     print('\n=== REAJUSTAR VALOR DA MATRÍCULA ===')
-    # Listar as matrículas antes (uma consulta rápida direto aqui ou reaproveitando se houver)
+    # Consulta interna para exibir o estado atual das matrículas
     cursor.execute("SELECT id_matricula, id_aluno, valor_mensal FROM matriculas")
     matriculas = cursor.fetchall()
     
@@ -59,6 +62,7 @@ def atualizar_valor_matricula(cursor, conexao):
         print(f"Erro ao atualizar a matrícula: {erro}")
         conexao.rollback()
 
+# Função para atualizar o contato de um aluno
 def atualizar_contato_aluno(cursor, conexao):
     print('\n=== ATUALIZAR CONTATO DO ALUNO ===')
     e3.listar_todos_alunos(cursor)
@@ -67,6 +71,7 @@ def atualizar_contato_aluno(cursor, conexao):
     novo_telefone = e2.ler_texto('Novo Telefone: ', obrigatorio=True)
     novo_email = e2.ler_texto('Novo Email: ', obrigatorio=True)
 
+    # Atualiza múltiplas colunas simultaneamente usando o comando SET
     comando = "UPDATE alunos SET telefone = %s, email = %s WHERE id_aluno = %s"
     
     try:
@@ -78,5 +83,5 @@ def atualizar_contato_aluno(cursor, conexao):
         else:
             print("ID do aluno não encontrado.")
     except Exception as erro:
-        print(f"rro ao atualizar contato: {erro}")
+        print(f"Erro ao atualizar contato: {erro}")
         conexao.rollback()

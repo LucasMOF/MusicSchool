@@ -1,14 +1,13 @@
-# Modulo principal: responsavel por orquestrar o menu, a conexao e o fluxo do sistema
+# Módulo etapa 9 apresentação do menu principal com todas as funcionalidades do sistema
 
 import sys
 import os
-
-# Ajusta o caminho do Python para permitir a importacao entre pastas do projeto
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import mysql.connector
 
-# Importacao de todos os modulos funcionais do sistema
+# Ajustando o caminho do Python para permitir importação entre pastas do projeto.
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Importando todos os módulos funcionais do sistema.
 import etapa2.RegristrarDados as e2
 import etapa3.Consultas as e3
 import etapa4.Update as e4
@@ -17,8 +16,8 @@ import etapa7.ConsultasJoin as e7
 import etapa8.ConsultasAgregacao as e8
 
 def iniciar_sistema():
+    # Tentando estabelecer a conexão com o banco de dados 'musicSchool'.
     try:
-        # Estabelece a conexao inicial com o banco de dados 'musicSchool'
         conexao = mysql.connector.connect(
             host='localhost',
             user='root',
@@ -27,12 +26,12 @@ def iniciar_sistema():
         )
 
         if conexao.is_connected():
-            print('Conexao com o banco de dados estabelecida!')
-            # O cursor e criado uma unica vez e passado como referencia para as funcoes
+            print('Conexão com o banco de dados estabelecida!')
+            # Criando o cursor para ser utilizado como referência nas funções.
             cursor = conexao.cursor()
             
-            def menu():
-                # Exibicao do menu principal dividido por responsabilidades
+            def exibir_menu():
+                # Exibindo o menu principal com as opções do sistema.
                 print('\n==================================================')
                 print('              SISTEMA MUSIC SCHOOL                ')
                 print('==================================================')
@@ -41,35 +40,35 @@ def iniciar_sistema():
                 print('  1 - Cadastrar Aluno')
                 print('  2 - Cadastrar Professor')
                 print('  3 - Cadastrar Instrumento')
-                print('  4 - Efetuar Matricula') 
+                print('  4 - Efetuar Matrícula') 
                 
-                print('\n--- LISTAGENS BASICAS ---')
+                print('\n--- LISTAGENS BÁSICAS ---')
                 print('  5 - Listar Todos os Alunos')
                 print('  6 - Listar Todos os Professores')
                 print('  7 - Listar Todos os Instrumentos')
                 
-                print('\n--- BUSCAS AVANCADAS ---')
+                print('\n--- BUSCAS AVANÇADAS ---')
                 print('  8 - Buscar Instrumentos com Baixo Estoque')
-                print('  9 - Buscar Matriculas por Valor Minimo')
+                print('  9 - Buscar Matrículas por Valor Mínimo')
 
-                print('\n--- LISTAGENS AVANCADAS ---')
-                print(' 10 - Alunos em Multiplos Instrumentos')
-                print(' 11 - Matriculas por Dia da Semana')
+                print('\n--- LISTAGENS AVANÇADAS ---')
+                print(' 10 - Alunos em Múltiplos Instrumentos')
+                print(' 11 - Matrículas por Dia da Semana')
                 print(' 12 - Ver Turma de um Professor')
                 print(' 13 - Instrumentos Nunca Escolhidos')   
                 
-                print('\n--- ATUALIZACOES (UPDATE) ---')
+                print('\n--- ATUALIZAÇÕES (UPDATE) ---')
                 print(' 14 - Atualizar Estoque de Instrumento')
-                print(' 15 - Reajustar Valor de Matricula')
+                print(' 15 - Reajustar Valor de Matrícula')
                 print(' 16 - Atualizar Contato de Aluno')
                 
-                print('\n--- REMOCOES (DELETE) ---')
-                print(' 17 - Cancelar Matricula')
+                print('\n--- REMOÇÕES (DELETE) ---')
+                print(' 17 - Cancelar Matrícula')
                 print(' 18 - Remover Aluno') 
                 
-                print('\n--- RELATORIOS E ESTATISTICAS ---')
-                print(' 19 - Relatorio de Matriculas')
-                print(' 20 - Carga Horaria dos Professores')
+                print('\n--- RELATÓRIOS E ESTATÍSTICAS ---')
+                print(' 19 - Relatório de Matrículas')
+                print(' 20 - Carga Horária dos Professores')
                 print(' 21 - Calcular Receita Mensal Total')
                 print(' 22 - Professor com Maior Receita')
                 
@@ -77,13 +76,13 @@ def iniciar_sistema():
                 print('  0 - Sair do Sistema')
                 print('==================================================\n')
 
-            # Loop principal de controle do sistema
+            # Iniciando o loop principal do sistema.
             while True:
-                menu()
-                # Leitura da opcao do usuario utilizando a funcao de validacao da etapa 2
-                opcao = e2.ler_texto('Escolha uma opcao: ', obrigatorio=True)
+                exibir_menu()
+                # Solicitando a opção do usuário.
+                opcao = e2.ler_texto('Escolha uma opção: ', obrigatorio=True)
 
-                # Estrutura match-case para delegar a execucao para o modulo/funcao correspondente
+                # Delegando a execução para a função correspondente à opção escolhida.
                 match opcao:
                     case '1': e2.cadastrar_aluno(cursor, conexao)
                     case '2': e2.cadastrar_professor(cursor, conexao)
@@ -117,16 +116,16 @@ def iniciar_sistema():
             print('Não foi possível estabelecer conexão com o banco de dados.')
 
     except mysql.connector.Error as erro:
-        # Tratamento de erro global para problemas de conexão ou falta do banco
+        # Exibindo erros globais de conexão.
         print(f'Erro ao conectar ao MySQL: {erro}')
 
     finally:
-        # Garante o fechamento dos recursos do banco, evitando consumo desnecessario de memória
+        # Encerrando os recursos do banco de forma segura.
         if 'cursor' in locals() and cursor:
             cursor.close()
         if 'conexao' in locals() and conexao.is_connected():
             conexao.close()
 
-# Ponto de entrada do script
+# Ponto de entrada do script.
 if __name__ == "__main__":
     iniciar_sistema()
